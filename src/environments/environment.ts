@@ -7,8 +7,15 @@ export const environment = {
   production: false,
 
   firebaseConfig: {
+    apiKey: "AIzaSyBYLKl0XVX8i9iF5T8PmdEPXXupGIylvqo",
+    authDomain: "lioncabs-fc588.firebaseapp.com",
+    databaseURL: "https://lioncabs-fc588.firebaseio.com",
+    projectId: "lioncabs-fc588",
+    storageBucket: "lioncabs-fc588.appspot.com",
+    messagingSenderId: "768358335569"
   },
 
   mapbox: {
+    accessToken: 'pk.eyJ1IjoidGhlY3JhYiIsImEiOiJWbFpnaDBzIn0.ucrweW4ZDtEFHZlxRYpUug'
   }
 };
