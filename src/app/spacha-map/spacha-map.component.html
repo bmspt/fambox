@@ -1,0 +1,120 @@
+<div class="columns is-gapless">
+  <div class="column is-one-quarter">
+    <!-- <h1 >Estimate Fare</h1>
+    <div class="field">
+      <p class="control has-icons-left">
+        <input class="input" [(ngModel)]="message" type="text" placeholder="ENTER PICKUP LOCATION">
+        <span class="icon is-small is-left">
+          <i class="fa fa-map-marker"></i>
+        </span>
+      </p>
+    </div>
+
+    <div class="field">
+      <p class="control has-icons-left">
+        <input class="input" type="text" placeholder="ENTER DESTINATION">
+        <span class="icon is-small is-left">
+          <i class="fa fa-flag-checkered"></i>
+        </span>
+      </p>
+    </div> -->
+    
+    <div *ngFor="let marker of markers | async">
+      <button (click)="flyTo(marker)">{{ marker.properties.message }}</button>
+      <button (click)="removeMarker(marker)">Delete</button>
+    </div>
+    <nav class="panel">
+      <p class="panel-heading">
+        estimate fare
+      </p>
+      <div class="panel-block">
+        <form class="form">
+        <div class="field has-addons">
+          <div class="control has-icons-left">
+            <input type="text" 
+              class="input" 
+              [value]="pickupAddress.formattedAddress" 
+              placeholder="PICKUP LOCATION">
+            <span class="icon is-left">
+              <i class="fa fa-map-pin"></i>
+            </span>
+          </div>
+          <div class="control">
+            <span class="button">
+              <i class="fa fa-times"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- <div class="field has-addons"> -->
+            <div class="control has-icons-left">
+              <input type="text" 
+                class="input" 
+                [value]="destinationAddress.formattedAddress" 
+                placeholder="DESTINATION">
+              <span class="icon is-left">
+                <i class="fa fa-map-pin"></i>
+              </span>
+            </div>
+            <!-- <div class="control">
+              <span class="button">
+                <i class="fa fa-check"></i>
+              </span>
+            </div> -->
+          <!-- </div> -->
+
+          <hr>
+            <table class="table is-fullwidth">
+                <tr class="is-selected">
+                  <td>foTa</td>
+                  <td>{{ 30 | currency: 'GBP': true }} </td>
+                </tr>
+                <tr class="">
+                  <td>siTa</td>
+                  <td>{{ 30 | currency: 'GBP': true }} </td>
+                </tr>
+                <tr class="">
+                  <td>eiTa</td>
+                  <td>{{ 30 | currency: 'GBP': true }} </td>
+                </tr>
+              </table>
+        </form>
+      </div>
+
+      <div class="panel-block">
+        <p class="control has-icons-left">
+          <input class="input is-small" 
+            type="text" 
+            #searchBox 
+            placeholder="{{ pickupAddress ? 'ENTER DESTINATION' : 'ENTER PICKUP LOCATION' }}" 
+            (keyup)="search(searchBox.value)"
+          >
+          <span class="icon is-small is-left has-text-success">
+            <i class="fa fa-circle"></i>
+          </span>
+        </p>
+      </div>
+
+      <div class="panel-block is-active" *ngFor="let address of searchResults | async" (click)="setAddress(address); searchBox.value=''">
+        <span class="panel-icon">
+          <i class="fa fa-map-marker"></i>
+        </span>
+        {{ address.formattedAddress }}
+      </div>
+
+      <div class="panel-block" *ngIf="pickupAddress && destinationAddress">
+        <button class="button is-primary is-large  is-fullwidth " 
+        (click)="buttonState()" >
+          <span>REQUEST RIDE</span>
+          <span class="icon">
+            <i class="fa fa-chevron-right"></i>
+          </span>
+        </button>
+      </div>
+    </nav>
+     <!-- <div style="min-height:500px; display:block;"></div>  -->
+  </div>
+
+  <!-- Spacha-Map -->
+  <div class="map column" id="spacha-map"></div>
+</div>

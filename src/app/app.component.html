@@ -1,3 +1,85 @@
-<h1>
-  {{title}}
-</h1>
+ <!-- <section class="section  is-fullheight is-fullhd">  -->
+  <nav class="navbar ">
+  <div class="navbar-brand">
+    <a class="navbar-item" href="http://bulma.io">
+      <img src="assets/images/fambox-logo.png" alt="Bulma: a modern CSS framework based on Flexbox" width="112" height="28">
+    </a>
+
+    <a class="navbar-item is-hidden-desktop" href="https://github.com/jgthms/bulma" target="_blank">
+      <span class="icon" style="color: #333;">
+        <i class="fa fa-github"></i>
+      </span>
+    </a>
+
+    <a class="navbar-item is-hidden-desktop" href="https://twitter.com/jgthms" target="_blank">
+      <span class="icon" style="color: #55acee;">
+        <i class="fa fa-twitter"></i>
+      </span>
+    </a>
+
+    <div class="navbar-burger burger" data-target="navMenuExample">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+
+  <div id="navMenuExample" class="navbar-menu">
+    <div class="navbar-start">
+      <a class="navbar-item " href="http://bulma.io/">
+        RIDE
+      </a>
+      <a class="navbar-item " href="http://bulma.io/">
+        DRIVE
+      </a>
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link  is-active" href="/cities/lincoln">
+          CITIES
+        </a>
+        <div class="navbar-dropdown ">
+          <a class="navbar-item " href="/cities/lincoln">
+            Lincoln
+          </a>
+          <a class="navbar-item " href="/cities/">
+            Nottingham
+          </a>
+          <a class="navbar-item " href="/cities/">
+            Manchester
+          </a>
+          <a class="navbar-item " href="/cities/">
+            Liverpool
+          </a>
+          <a class="navbar-item " href="/cities/">
+            Hull
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- right nav items -->
+    <div class="navbar-end">
+      <a class="navbar-item">
+        SIGN UP
+      </a>
+      <a class="navbar-item">
+        SIGNIN
+      </a>
+      <div class="navbar-item">
+        <p class="control">
+          <button class="button is-primary">
+            <span class="icon">
+              <i class="fa fa-taxi"></i>
+            </span>
+            <span>BECOME A DRIVER</span>
+          </button>
+        </p>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container is-fullhd">
+  <app-spacha-map></app-spacha-map>
+</div>
+
+<!-- </section>  -->
