@@ -25,180 +25,188 @@ import 'rxjs/add/operator/distinctUntilChanged'
 })
 export class SpachaMapComponent implements OnInit {
 
-  // default settings
-  map: Map
-  style: string  = 'mapbox://styles/mapbox/dark-v9'
-  lat:number     = 0.0
-  lng:number     = 0.0
-  message:string
+    // default settings
+    map: Map
+    style: string  = 'mapbox://styles/mapbox/dark-v9'
+    lat:number     = 0.0
+    lng:number     = 0.0
+    message:string
 
-  // data
-  source: any
-  markers: any
+    // data
+    source: any
+    markers: any
 
-  // Search
-  private searchTerms:Subject<string> = new Subject<string>()
-  searchResults:Observable<Address[]>
-  pickupAddress:Address = null
-  destinationAddress:Address = null
+    // Search
+    private searchTerms:Subject<string> = new Subject<string>()
+    searchResults:Observable<Address[]>
+    pickupLocation:string = ''
+    destinationLocation:string = ''
+    pickupAddress:Address = null
+    destinationAddress:Address = null
+    // editingPickupLocation:boolean = false
 
-  constructor(private mapService:SpachaMapService, private http:Http) { }
+    constructor(private mapService:SpachaMapService, private http:Http) { }
 
-  ngOnInit() {
-    this.initializeMap()
-    // this.markers       = this.mapService.getMarkers()
-    this.searchResults = this.searchTerms
-        .debounceTime(300)
-        .distinctUntilChanged()
-        .switchMap(term => term
-          ? this.mapService.search(term)
-          : Observable.of<Address[]>([])
-        )
-        .catch(error => {
-          console.log(error)
-          return Observable.of<Address[]>([])
-        })
-    
-  }
-
-  initializeMap() {
-    // locate the visitor    
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(position => {
-            this.lat = position.coords.latitude
-            this.lng = position.coords.longitude
-            this.map.flyTo({
-                center: [this.lng, this.lat]
+    ngOnInit() {
+        this.initializeMap()
+        // this.markers       = this.mapService.getMarkers()
+        this.searchResults = this.searchTerms
+            .debounceTime(300)
+            .distinctUntilChanged()
+            .switchMap(term => term
+            ? this.mapService.search(term)
+            : Observable.of<Address[]>([])
+            )
+            .catch(error => {
+            console.log(error)
+            return Observable.of<Address[]>([])
             })
+        
+    }
+
+    initializeMap() {
+        // locate the visitor    
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                this.lat = position.coords.latitude
+                this.lng = position.coords.longitude
+                this.map.flyTo({
+                    center: [this.lng, this.lat]
+                })
+
+                // this.pickupAddress = this.mapService.reverse(LngLat(this.lng, this.lat))
+
+            })
+
+        // this.mapService.reverse(LngLat(this.lng, this.lat)).subscribe( res => {
+        //   this.pickupAddress = res
+        // })
+        }
+
+        // else {
+        //   this.http.get('http://freegeoip.net/json/')
+        //       .subscribe( data => {
+        //         let js = JSON.parse(data['_body'])
+        //         this.lat = js.latitude
+        //         this.lng = js.longitude
+        //         this.map.flyTo({
+        //           center: [this.lng, this.lat]
+        //         })
+        //       })
+        // }
+        
+        this.map = this.mapService.map = new Map({
+            container: 'spacha-map',
+            style: this.style,
+            zoom: 13,
+            center: [this.lng, this.lat]
+        })
+        
+        this.buildMap()    
+    }
+
+    buildMap() {
+        // Add map controls
+        // this.map.addControl(new mapboxgl.control())
+        let geolocateControl = new GeolocateControl({
+            positionOptions: { enableHighAccuracy: true },
+            watchPosition: false
         })
 
-      // this.mapService.reverse(LngLat(this.lng, this.lat)).subscribe( res => {
-      //   this.pickupAddress = res
-      // })
+        this.map.on('load', (e) => {
+            this.map.addControl(geolocateControl)
+            
+            // register the source
+            this.map.addSource('firebase', {
+                type: 'geojson',
+                data: {
+                    type: 'FeatureCollection',
+                    features: []
+                }
+            })
+            
+            // create map layers with realtime data
+            this.map.addLayer({
+                id: 'firebase',
+                source: 'firebase',
+                type: 'symbol',
+                layout: {
+                    'text-field': '{message}',
+                    'text-size': 24,
+                    'text-transform': 'uppercase',
+                    'icon-image': 'rocket-15',
+                    'text-offset': [0, 1.5]
+                },
+                paint: {
+                    'text-color': '#f16624',
+                    'text-halo-color': '#fff',
+                    'text-halo-width': 2
+                }
+            })
+        }) // END Map.on('load', ...)
+
+        geolocateControl.on('geolocate', (event) => {
+            this.flyTo(new GeoJson([event.coords.longitude, event.coords.latitude], { message: 'You' }))
+        })
+
+        // get source
+        this.source = this.map.getSource('firebase')
+        
+        // subscribe to realtime database set and source
+        // this.markers.subscribe(markers => {
+        //   let data = new FeatureCollection(markers)
+        //   this.source.setData(data)
+        // })
+
+        // Add realtime firebase data on map load
+        // Add Marker on Click
+        // this.map.on('click', (event) => {
+        //   const coordinates = [event.lngLat.lng, event.lngLat.lat]
+        //   const newMarker = new GeoJson(coordinates, { message: this.message })
+        //   this.mapService.createMarkers(newMarker)
+        // })    
     }
 
-    // else {
-    //   this.http.get('http://freegeoip.net/json/')
-    //       .subscribe( data => {
-    //         let js = JSON.parse(data['_body'])
-    //         this.lat = js.latitude
-    //         this.lng = js.longitude
-    //         this.map.flyTo({
-    //           center: [this.lng, this.lat]
-    //         })
-    //       })
+    // Helpers
+    removeMarker(marker) {
+        this.mapService.removeMarker(marker.$key)
+    }
+
+    flyTo(data:GeoJson) {
+        this.map.flyTo({
+            center: data.geometry.coordinates,
+            zoom: 13
+        })
+    }
+
+    // geocodeAddress(address:string):void {
+    //   this.http.get(`api/geocode?address=${encodeURIComponent(address)}&region=gb&provider=google`)
+        // this.markers
     // }
-    
-    this.map = this.mapService.map = new Map({
-      container: 'spacha-map',
-      style: this.style,
-      zoom: 13,
-      center: [this.lng, this.lat]
-    })
-    
-    this.buildMap()    
-  }
 
-  buildMap() {
-    // Add map controls
-    // this.map.addControl(new mapboxgl.control())
-    let geolocateControl = new GeolocateControl({
-      positionOptions: { enableHighAccuracy: true },
-      watchPosition: false
-    })
-
-    this.map.on('load', (e) => {
-      this.map.addControl(geolocateControl)
-    
-      // register the source
-      this.map.addSource('firebase', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: []
-        }
-      })
-    
-      // create map layers with realtime data
-      this.map.addLayer({
-        id: 'firebase',
-        source: 'firebase',
-        type: 'symbol',
-        layout: {
-          'text-field': '{message}',
-          'text-size': 24,
-          'text-transform': 'uppercase',
-          'icon-image': 'rocket-15',
-          'text-offset': [0, 1.5]
-        },
-        paint: {
-          'text-color': '#f16624',
-          'text-halo-color': '#fff',
-          'text-halo-width': 2
-        }
-      })
-    }) // END Map.on('load', ...)
-
-    geolocateControl.on('geolocate', (event) => {
-      this.flyTo(new GeoJson([event.coords.longitude, event.coords.latitude], { message: 'You' }))
-    })
-
-    // get source
-    this.source = this.map.getSource('firebase')
-    
-    // subscribe to realtime database set and source
-    // this.markers.subscribe(markers => {
-    //   let data = new FeatureCollection(markers)
-    //   this.source.setData(data)
-    // })
-
-    // Add realtime firebase data on map load
-    // Add Marker on Click
-    // this.map.on('click', (event) => {
-    //   const coordinates = [event.lngLat.lng, event.lngLat.lat]
-    //   const newMarker = new GeoJson(coordinates, { message: this.message })
-    //   this.mapService.createMarkers(newMarker)
-    // })    
-  }
-
-  // Helpers
-  removeMarker(marker) {
-    this.mapService.removeMarker(marker.$key)
-  }
-
-  flyTo(data:GeoJson) {
-    this.map.flyTo({
-      center: data.geometry.coordinates,
-      zoom: 13
-    })
-  }
-
-  // geocodeAddress(address:string):void {
-  //   this.http.get(`api/geocode?address=${encodeURIComponent(address)}&region=gb&provider=google`)
-    // this.markers
-  // }
-
-  // Search implementation
-  search(term:string) {
-    this.searchTerms.next(term)
-  }
-
-  setAddress(address:Address):void {
-    if (this.pickupAddress) {
-      this.destinationAddress = address
-    } else {
-      this.pickupAddress = address
+    // Search implementation
+    search(term:string) {
+        if (term.length >= 3) this.searchTerms.next(term)
     }
-    // this.searchResults = new Observable<Address[]>()
-  }
 
-  unsetAddress(address:Address):void {
-    address = null
-  }
+    setAddress(address:Address):void {
+        if (this.pickupAddress) {
+            this.destinationAddress = address
+            this.destinationLocation = address.formattedAddress
+            this.searchResults = Observable.of<Address[]>([])
+        } else {
+            this.pickupAddress = address
+            this.pickupLocation = address.formattedAddress            
+        }
+    }
 
-  buttonState() {
-    console.log('Reserve btn clicked')
-  }
+    unsetAddress(address:Address):void {
+        address = null
+    }
+
+    buttonState() {
+        console.log('Reserve btn clicked')
+    }
 }
 
 // interface IRide {

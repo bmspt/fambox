@@ -38,7 +38,7 @@ export class SpachaMapService {
   search(address:string):Observable<Address[]> {
     // return this.http.get('api/addresses/search')
     return this.http
-    .get(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&region=gb`)
+    .get(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&components=country:GB`)
     .map(res => res.json().results)
     .map(results => {
         let addresses: Address[] = []

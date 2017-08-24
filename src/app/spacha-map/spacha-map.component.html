@@ -28,14 +28,17 @@
         estimate fare
       </p>
       <div class="panel-block">
-        <form class="form">
+        <div class="form">
         <div class="field has-addons">
           <div class="control has-icons-left">
             <input type="text" 
-              class="input" 
-              [value]="pickupAddress.formattedAddress" 
+              class="input"
+              #pickupBox 
+              [value]="pickupLocation"
+              (keyup)="search(pickupBox.value)" 
               placeholder="PICKUP LOCATION">
-            <span class="icon is-left">
+
+            <span class="icon is-left" (click)="unsetAddress(pickupAddress)">
               <i class="fa fa-map-pin"></i>
             </span>
           </div>
@@ -47,41 +50,44 @@
         </div>
 
         <!-- <div class="field has-addons"> -->
-            <div class="control has-icons-left">
-              <input type="text" 
-                class="input" 
-                [value]="destinationAddress.formattedAddress" 
-                placeholder="DESTINATION">
-              <span class="icon is-left">
-                <i class="fa fa-map-pin"></i>
-              </span>
+            <div class="control has-icons-left" *ngIf="pickupAddress">
+                <input type="text"
+                    #destinationBox 
+                    class="input" 
+                    [value]="destinationLocation" 
+                    (keyup)="search(destinationBox.value)" 
+                    placeholder="DESTINATION"
+                >
+                <span class="icon is-left">
+                    <i class="fa fa-map-pin"></i>
+                </span>
             </div>
             <!-- <div class="control">
-              <span class="button">
-                <i class="fa fa-check"></i>
-              </span>
+                <span class="button">
+                    <i class="fa fa-check"></i>
+                </span>
             </div> -->
-          <!-- </div> -->
+            <!-- </div> -->
 
-          <hr>
-            <table class="table is-fullwidth">
+            <hr>
+            <table class="table is-fullwidth" *ngIf="pickupAddress && destinationAddress">
                 <tr class="is-selected">
-                  <td>foTa</td>
-                  <td>{{ 30 | currency: 'GBP': true }} </td>
+                    <td>foTa</td>
+                    <td>{{ 30 | currency: 'GBP': true }} </td>
                 </tr>
                 <tr class="">
-                  <td>siTa</td>
-                  <td>{{ 30 | currency: 'GBP': true }} </td>
+                    <td>siTa</td>
+                    <td>{{ 30 | currency: 'GBP': true }} </td>
                 </tr>
                 <tr class="">
-                  <td>eiTa</td>
-                  <td>{{ 30 | currency: 'GBP': true }} </td>
+                    <td>eiTa</td>
+                    <td>{{ 30 | currency: 'GBP': true }} </td>
                 </tr>
-              </table>
-        </form>
+            </table>
+        </div>
       </div>
 
-      <div class="panel-block">
+      <!-- <div class="panel-block">
         <p class="control has-icons-left">
           <input class="input is-small" 
             type="text" 
@@ -93,9 +99,9 @@
             <i class="fa fa-circle"></i>
           </span>
         </p>
-      </div>
+      </div> -->
 
-      <div class="panel-block is-active" *ngFor="let address of searchResults | async" (click)="setAddress(address); searchBox.value=''">
+      <div class="panel-block is-active" *ngFor="let address of searchResults | async" (click)="setAddress(address)">
         <span class="panel-icon">
           <i class="fa fa-map-marker"></i>
         </span>
