@@ -30,7 +30,7 @@ export class SpachaMapComponent implements OnInit {
     style: string  = 'mapbox://styles/mapbox/dark-v9'
     lat:number     = 0.0
     lng:number     = 0.0
-    message:string
+    message:string = "Hello msg"
 
     // data
     source: any
@@ -43,13 +43,13 @@ export class SpachaMapComponent implements OnInit {
     destinationLocation:string = ''
     pickupAddress:Address = null
     destinationAddress:Address = null
-    // editingPickupLocation:boolean = false
 
-    constructor(private mapService:SpachaMapService, private http:Http) { }
+    constructor(private mapService:SpachaMapService, private http:Http) {}
 
     ngOnInit() {
+        this.markers       = this.mapService.getMarkers()
+        
         this.initializeMap()
-        // this.markers       = this.mapService.getMarkers()
         this.searchResults = this.searchTerms
             .debounceTime(300)
             .distinctUntilChanged()
@@ -73,27 +73,8 @@ export class SpachaMapComponent implements OnInit {
                 this.map.flyTo({
                     center: [this.lng, this.lat]
                 })
-
-                // this.pickupAddress = this.mapService.reverse(LngLat(this.lng, this.lat))
-
             })
-
-        // this.mapService.reverse(LngLat(this.lng, this.lat)).subscribe( res => {
-        //   this.pickupAddress = res
-        // })
         }
-
-        // else {
-        //   this.http.get('http://freegeoip.net/json/')
-        //       .subscribe( data => {
-        //         let js = JSON.parse(data['_body'])
-        //         this.lat = js.latitude
-        //         this.lng = js.longitude
-        //         this.map.flyTo({
-        //           center: [this.lng, this.lat]
-        //         })
-        //       })
-        // }
         
         this.map = this.mapService.map = new Map({
             container: 'spacha-map',
@@ -113,6 +94,7 @@ export class SpachaMapComponent implements OnInit {
             watchPosition: false
         })
 
+        // Add realtime firebase data on map load
         this.map.on('load', (e) => {
             this.map.addControl(geolocateControl)
             
@@ -143,28 +125,27 @@ export class SpachaMapComponent implements OnInit {
                     'text-halo-width': 2
                 }
             })
+
+            // Add Marker on Click
+            this.map.on('click', (event) => {
+                const coordinates = [event.lngLat.lng, event.lngLat.lat]
+                const newMarker = new GeoJson(coordinates, { message: this.message })
+                this.mapService.createMarkers(newMarker)
+            })
+        
+            // get source
+            this.source = this.map.getSource('firebase')
+            
+            // subscribe to realtime database set and source
+            this.markers.subscribe(marks => {
+                let data = new FeatureCollection(marks)
+                this.source.setData(data)
+            })    
         }) // END Map.on('load', ...)
 
         geolocateControl.on('geolocate', (event) => {
             this.flyTo(new GeoJson([event.coords.longitude, event.coords.latitude], { message: 'You' }))
         })
-
-        // get source
-        this.source = this.map.getSource('firebase')
-        
-        // subscribe to realtime database set and source
-        // this.markers.subscribe(markers => {
-        //   let data = new FeatureCollection(markers)
-        //   this.source.setData(data)
-        // })
-
-        // Add realtime firebase data on map load
-        // Add Marker on Click
-        // this.map.on('click', (event) => {
-        //   const coordinates = [event.lngLat.lng, event.lngLat.lat]
-        //   const newMarker = new GeoJson(coordinates, { message: this.message })
-        //   this.mapService.createMarkers(newMarker)
-        // })    
     }
 
     // Helpers
@@ -178,11 +159,6 @@ export class SpachaMapComponent implements OnInit {
             zoom: 13
         })
     }
-
-    // geocodeAddress(address:string):void {
-    //   this.http.get(`api/geocode?address=${encodeURIComponent(address)}&region=gb&provider=google`)
-        // this.markers
-    // }
 
     // Search implementation
     search(term:string) {
@@ -198,6 +174,11 @@ export class SpachaMapComponent implements OnInit {
             this.pickupAddress = address
             this.pickupLocation = address.formattedAddress            
         }
+
+        // const coordinates = [address.geocodes.longitude, address.geocodes.latitude]
+        // const newMarker = new GeoJson(coordinates, { message: address.formattedAddress })
+        // let data = new FeatureCollection(newMarker)
+        // this.source.setData(data)
     }
 
     unsetAddress(address:Address):void {

@@ -1,9 +1,9 @@
 <div class="columns is-gapless">
   <div class="column is-one-quarter">
-    <!-- <h1 >Estimate Fare</h1>
+    <!-- <h1 >Estimate Fare</h1> -->
     <div class="field">
       <p class="control has-icons-left">
-        <input class="input" [(ngModel)]="message" type="text" placeholder="ENTER PICKUP LOCATION">
+        <input class="input" [(ngModel)]="message" type="text" placeholder="Message">
         <span class="icon is-small is-left">
           <i class="fa fa-map-marker"></i>
         </span>
@@ -17,12 +17,13 @@
           <i class="fa fa-flag-checkered"></i>
         </span>
       </p>
-    </div> -->
+    </div>
     
     <div *ngFor="let marker of markers | async">
       <button (click)="flyTo(marker)">{{ marker.properties.message }}</button>
       <button (click)="removeMarker(marker)">Delete</button>
     </div>
+    
     <nav class="panel">
       <p class="panel-heading">
         estimate fare
