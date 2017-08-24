@@ -131,21 +131,21 @@ export class SpachaMapComponent implements OnInit {
                 const coordinates = [event.lngLat.lng, event.lngLat.lat]
                 const newMarker = new GeoJson(coordinates, { message: this.message })
                 this.mapService.createMarkers(newMarker)
-            })
-        
-            // get source
-            this.source = this.map.getSource('firebase')
-            
-            // subscribe to realtime database set and source
-            this.markers.subscribe(marks => {
-                let data = new FeatureCollection(marks)
-                this.source.setData(data)
-            })    
+            })  
         }) // END Map.on('load', ...)
 
         geolocateControl.on('geolocate', (event) => {
             this.flyTo(new GeoJson([event.coords.longitude, event.coords.latitude], { message: 'You' }))
         })
+        
+        // get source
+        this.source = this.map.getSource('firebase')
+        
+        // subscribe to realtime database set and source
+        this.markers.subscribe(marks => {
+            let data = new FeatureCollection(marks)
+            this.source.setData(data)
+        })  
     }
 
     // Helpers
