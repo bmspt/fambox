@@ -27,9 +27,8 @@ export class SpachaMapComponent implements OnInit {
 
     // default settings
     map: Map
-    style: string  = 'mapbox://styles/mapbox/dark-v9'
-    lat:number     = 0.0
-    lng:number     = 0.0
+    lat:number = 0.0
+    lng:number = 0.0
     message:string = "Hello msg"
 
     // data
@@ -47,25 +46,31 @@ export class SpachaMapComponent implements OnInit {
     constructor(private mapService:SpachaMapService, private http:Http) {}
 
     ngOnInit() {
-        this.markers       = this.mapService.getMarkers()
+        this.markers = this.mapService.getMarkers()
         
         this.initializeMap()
         this.searchResults = this.searchTerms
             .debounceTime(300)
             .distinctUntilChanged()
             .switchMap(term => term
-            ? this.mapService.search(term)
-            : Observable.of<Address[]>([])
+                ? this.mapService.search(term)
+                : Observable.of<Address[]>([])
             )
             .catch(error => {
-            console.log(error)
-            return Observable.of<Address[]>([])
+                console.log(error)
+                return Observable.of<Address[]>([])
             })
         
     }
 
     initializeMap() {
-        // locate the visitor    
+        this.map = new mapboxgl.Map({
+            container: 'spacha-map',
+            zoom: 13,
+            center: [this.lng, this.lat],
+            style: 'mapbox://styles/mapbox/dark-v9'
+        })
+        // locate the visitor
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(position => {
                 this.lat = position.coords.latitude
@@ -75,14 +80,7 @@ export class SpachaMapComponent implements OnInit {
                 })
             })
         }
-        
-        this.map = this.mapService.map = new Map({
-            container: 'spacha-map',
-            style: this.style,
-            zoom: 13,
-            center: [this.lng, this.lat]
-        })
-        
+
         this.buildMap()    
     }
 
@@ -93,6 +91,13 @@ export class SpachaMapComponent implements OnInit {
             positionOptions: { enableHighAccuracy: true },
             watchPosition: false
         })
+
+        // Add Marker on Click
+        this.map.on('click', (event) => {
+            const coordinates = [event.lngLat.lng, event.lngLat.lat]
+            const newMarker = new GeoJson(coordinates, { message: this.message })
+            this.mapService.createMarkers(newMarker)
+        }) 
 
         // Add realtime firebase data on map load
         this.map.on('load', (e) => {
@@ -126,26 +131,19 @@ export class SpachaMapComponent implements OnInit {
                 }
             })
 
-            // Add Marker on Click
-            this.map.on('click', (event) => {
-                const coordinates = [event.lngLat.lng, event.lngLat.lat]
-                const newMarker = new GeoJson(coordinates, { message: this.message })
-                this.mapService.createMarkers(newMarker)
-            })  
-        }) // END Map.on('load', ...)
+            // get source
+            this.source = this.map.getSource('firebase')
+            
+            // subscribe to realtime database set and source
+            this.markers.subscribe(markers => {
+                let data = new FeatureCollection(markers)
+                this.source.setData(data)
+            })
 
-        geolocateControl.on('geolocate', (event) => {
-            this.flyTo(new GeoJson([event.coords.longitude, event.coords.latitude], { message: 'You' }))
-        })
-        
-        // get source
-        this.source = this.map.getSource('firebase')
-        
-        // subscribe to realtime database set and source
-        this.markers.subscribe(marks => {
-            let data = new FeatureCollection(marks)
-            this.source.setData(data)
-        })  
+            geolocateControl.on('geolocate', (event) => {
+                this.flyTo(new GeoJson([event.coords.longitude, event.coords.latitude], { message: 'You' }))
+            })
+        }) // END Map.on('load', ...)
     }
 
     // Helpers

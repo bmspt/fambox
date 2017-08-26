@@ -16,24 +16,24 @@ import 'rxjs/add/operator/map'
 
 @Injectable()
 export class SpachaMapService {
-  map:Map
-  
-  constructor(public db: AngularFireDatabase, private http:Http) {
-    (mapboxgl as any).accessToken = environment.mapbox.accessToken
-  }
+    map:Map
 
-  getMarkers(): FirebaseListObservable<any> {
-    return this.db.list('/markers')
-  }
+    constructor(public db: AngularFireDatabase, private http:Http) {
+        (mapboxgl as any).accessToken = environment.mapbox.accessToken
+    }
 
-  createMarkers(data:GeoJson) {
-    return this.db.list('/markers')
-                  .push(data)
-  }
+    getMarkers(): FirebaseListObservable<any> {
+        return this.db.list('/markers')
+    }
+
+    createMarkers(data:GeoJson) {
+        return this.db.list('/markers')
+                    .push(data)
+    }
   
-  removeMarker($key:string) {
-    return this.db.object('/markers/' + $key).remove()
-  }
+    removeMarker($key:string) {
+        return this.db.object('/markers/' + $key).remove()
+    }
 
   search(address:string):Observable<Address[]> {
     // return this.http.get('api/addresses/search')

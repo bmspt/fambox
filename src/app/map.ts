@@ -26,7 +26,7 @@ export class GeoJson implements IGeoJson {
 }
 
 export class FeatureCollection {
-    type: 'FeatureCollection'
+    type:string = 'FeatureCollection'
     constructor(public features: Array<GeoJson>) {}
 }
 
