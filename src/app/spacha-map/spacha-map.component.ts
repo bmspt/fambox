@@ -64,12 +64,6 @@ export class SpachaMapComponent implements OnInit {
     }
 
     initializeMap() {
-        this.map = new mapboxgl.Map({
-            container: 'spacha-map',
-            zoom: 13,
-            center: [this.lng, this.lat],
-            style: 'mapbox://styles/mapbox/dark-v9'
-        })
         // locate the visitor
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(position => {
@@ -80,6 +74,13 @@ export class SpachaMapComponent implements OnInit {
                 })
             })
         }
+
+        this.map = new mapboxgl.Map({
+            container: 'spacha-map',
+            zoom: 13,
+            center: [this.lng, this.lat],
+            style: 'mapbox://styles/mapbox/dark-v9'
+        })
 
         this.buildMap()    
     }
