@@ -4,6 +4,7 @@ import * as mapboxgl from "mapbox-gl"
 import { Map, GeolocateControl, LngLat } from "mapbox-gl"
 import { SpachaMapService } from "./spacha-map.service";
 import { GeoJson, FeatureCollection, Address } from "../map";
+import { EstimateService, Price, EstimateParams } from "../services/estimate.service";
 
 import { Subject } from "rxjs/Subject";
 import { Observable } from "rxjs/Observable";
@@ -38,12 +39,13 @@ export class SpachaMapComponent implements OnInit {
     // Search
     private searchTerms:Subject<string> = new Subject<string>()
     searchResults:Observable<Address[]>
+    prices:Observable<Price[]>
     pickupLocation:string = ''
     destinationLocation:string = ''
     pickupAddress:Address = null
     destinationAddress:Address = null
 
-    constructor(private mapService:SpachaMapService, private http:Http) {}
+    constructor(private mapService:SpachaMapService, private estimateService:EstimateService, private http:Http) {}
 
     ngOnInit() {
         this.markers = this.mapService.getMarkers()
@@ -174,6 +176,9 @@ export class SpachaMapComponent implements OnInit {
             this.pickupLocation = address.formattedAddress            
         }
 
+        if (this.pickupAddress && this.destinationAddress) {
+            this.getPrices()
+        }
         // const coordinates = [address.geocodes.longitude, address.geocodes.latitude]
         // const newMarker = new GeoJson(coordinates, { message: address.formattedAddress })
         // let data = new FeatureCollection(newMarker)
@@ -182,10 +187,24 @@ export class SpachaMapComponent implements OnInit {
 
     unsetAddress(address:Address):void {
         address = null
+        this.prices = Observable.of<Price[]>([])
     }
 
     buttonState() {
         console.log('Reserve btn clicked')
+    }
+
+    getPrices():void {
+        let coordinates:EstimateParams = {
+            start_latitude:  this.pickupAddress.geocodes.latitude,
+            start_longitude: this.pickupAddress.geocodes.longitude,
+            end_latitude:    this.destinationAddress.geocodes.latitude,
+            end_longitude:   this.destinationAddress.geocodes.longitude
+        }
+
+        this.estimateService.estimate(coordinates)
+            .subscribe( price => console.log(price))
+        
     }
 }
 
