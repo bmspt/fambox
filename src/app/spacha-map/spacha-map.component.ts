@@ -4,6 +4,7 @@ import * as mapboxgl from "mapbox-gl"
 import { Map, GeolocateControl, LngLat } from "mapbox-gl"
 import { SpachaMapService } from "./spacha-map.service";
 import { GeoJson, FeatureCollection, Address } from "../map";
+import { EstimateService, Price, EstimateParams } from "../services/estimate.service";
 
 import { Subject } from "rxjs/Subject";
 // import { ReplaySubject } from "rxjs/ReplaySubject";
@@ -39,12 +40,13 @@ export class SpachaMapComponent implements OnInit {
     // Search
     private searchTerms:Subject<string> = new Subject<string>()
     searchResults:Observable<Address[]>
+    prices:Observable<Price[]>
     pickupLocation:string = ''
     destinationLocation:string = ''
     pickupAddress:Address = null
     destinationAddress:Address = null
 
-    constructor(private mapService:SpachaMapService, private http:Http) {}
+    constructor(private mapService:SpachaMapService, private estimateService:EstimateService, private http:Http) {}
 
     ngOnInit() {
         this.markers = this.mapService.getMarkers()
@@ -175,22 +177,21 @@ export class SpachaMapComponent implements OnInit {
             this.pickupAddress = address
             this.pickupLocation = address.formattedAddress            
         }
-        this.searchTerms.next()        
+
+        this.searchTerms.next() 
+
+        if (this.pickupAddress && this.destinationAddress) {
+            this.getPrices()
+        }
         // const coordinates = [address.geocodes.longitude, address.geocodes.latitude]
         // const newMarker = new GeoJson(coordinates, { message: address.formattedAddress })
         // let data = new FeatureCollection(newMarker)
         // this.source.setData(data)
     }
 
-    Search(address:string, type?:string) {
-        // type == 'pickup' ? this.editingPickup = true : this.editingPickup = false
-    }
-
-    unsetAddress(address:string):void {
-        this.pickupAddress = null
-        this.pickupLocation = null            
-            // console.log(address, 'address was clicked');
-        
+    unsetAddress(address:Address):void {
+        address = null
+        this.prices = Observable.of<Price[]>([])
     }
 
     buttonState() {
@@ -204,6 +205,17 @@ export class SpachaMapComponent implements OnInit {
             this.pickupAddress = a
             this.pickupLocation = a.formattedAddress
         })
+    }
+
+    private getPrices():void {
+        let coordinates:EstimateParams = {
+            start_latitude:  this.pickupAddress.geocodes.latitude,
+            start_longitude: this.pickupAddress.geocodes.longitude,
+            end_latitude:    this.destinationAddress.geocodes.latitude,
+            end_longitude:   this.destinationAddress.geocodes.longitude
+        }
+
+        this.prices = this.estimateService.estimate(coordinates)
     }
 }
 

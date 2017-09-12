@@ -6,6 +6,7 @@ import { HttpModule } from '@angular/http';
 import { AppComponent } from './app.component';
 import { SpachaMapComponent } from './spacha-map/spacha-map.component';
 import { SpachaMapService } from './spacha-map/spacha-map.service';
+import { EstimateService } from "./services/estimate.service";
 
 // Firebase
 import { AngularFireModule }          from "angularfire2";
@@ -29,7 +30,7 @@ import { environment } from '../environments/environment'
     AngularFireDatabaseModule,
     AngularFireAuthModule
   ],
-  providers: [SpachaMapService],
+  providers: [SpachaMapService, EstimateService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
