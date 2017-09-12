@@ -1,19 +1,19 @@
 <div class="columns is-gapless">
     <div class="column is-one-quarter">
         <!-- <h1 >Estimate Fare</h1> -->
-        <div class="field">
+        <!-- <div class="field">
             <p class="control has-icons-left">
                 <input class="input" [(ngModel)]="message" type="text" placeholder="Message">
                 <span class="icon is-small is-left">
                     <i class="fa fa-map-marker"></i>
                 </span>
             </p>
-        </div>
+        </div> -->
     
-        <div *ngFor="let marker of markers | async">
+        <!-- <div *ngFor="let marker of markers | async">
             <button (click)="flyTo(marker)">{{ marker.properties.message }}</button>
             <button (click)="removeMarker(marker)">Delete</button>
-        </div>
+        </div> -->
     
         <nav class="panel">
             <p class="panel-heading">
@@ -30,19 +30,17 @@
                                 (keyup)="search(pickupBox.value)" 
                                 placeholder="PICKUP LOCATION">
 
-                            <span class="icon is-left" (click)="unsetAddress(pickupAddress)">
+                            <span class="icon is-left">
                                 <i class="fa fa-map-pin"></i>
                             </span>
                         </div>
                         <div class="control">
-                            <span class="button" (click)="unsetAddress('pickup')" >
-                                <!-- <i class="fa fa-times"></i> -->
+                            <span class="button" (click)="resetFields()" >
                                 X
                             </span>
                         </div>
                     </div>
 
-                    <!-- <div class="field has-addons"> -->
                     <div class="control has-icons-left" *ngIf="pickupAddress">
                         <input type="text"
                             #destinationBox 
@@ -55,12 +53,6 @@
                             <i class="fa fa-flag-checkered"></i>
                         </span>
                     </div>
-                    <!-- <div class="control">
-                        <span class="button">
-                            <i class="fa fa-check"></i>
-                        </span>
-                    </div> -->
-                    <!-- </div> -->
 
                     <div class="panel-block is-active" *ngFor="let address of searchResults | async" (click)="setAddress(address)">
                         <span class="panel-icon">
@@ -71,31 +63,13 @@
                     
                     <hr>
                     <table class="table is-fullwidth" *ngIf="pickupAddress && destinationAddress">
-                        <!-- <tr class="is-selected">
-                            <td>foTa</td>
-                            <td>{{ 30 | currency: 'GBP': true }} </td>
-                        </tr> -->
                         <tr class="" *ngFor=" let price of prices | async">
-                            <td>siTa</td>
-                            <td>{{ price | json }} </td>
+                            <td>{{price.localized_display_name}}</td>
+                            <td>{{ price.estimate }} </td>
                         </tr>
                     </table>
                 </div>
             </div>
-
-            <!-- <div class="panel-block">
-                <p class="control has-icons-left">
-                <input class="input is-small" 
-                    type="text" 
-                    #searchBox 
-                    placeholder="{{ pickupAddress ? 'ENTER DESTINATION' : 'ENTER PICKUP LOCATION' }}" 
-                    (keyup)="search(searchBox.value)"
-                >
-                <span class="icon is-small is-left has-text-success">
-                    <i class="fa fa-circle"></i>
-                </span>
-                </p>
-            </div> -->
 
             <div class="panel-block" *ngIf="pickupAddress && destinationAddress">
                 <button class="button is-primary is-large  is-fullwidth " 
@@ -110,5 +84,22 @@
     </div>
 
     <!-- Spacha-Map -->
-    <div class="map column" id="spacha-map"></div>
+    <div class="map column" id="spacha-map"></div>  
 </div>
+
+<footer class="footer">
+        <div class="container">
+          <div class="content has-text-centered">
+            <p>
+              <strong>FAMBOX</strong> by <a href="https://github.io/thecrab">The Crab</a>. Made with lots of love
+              <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. The website content
+              is copyright <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC ANS 4.0</a>.
+            </p>
+            <p>
+              <a class="icon" href="https://github.com/thecrab/fambox">
+                <i class="fa fa-github"></i>
+              </a>
+            </p>
+          </div>
+        </div>
+      </footer>

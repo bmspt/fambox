@@ -7,28 +7,17 @@ import { Observable }   from "rxjs/Observable"
 export class EstimateService {
     
     private headers:Headers
-    private url:string = 'http://localhost:4000/api/estimate?   '
-    // private url:string = 'https://api.uber.com/v1.2/estimates/price?'
+    private url:string = 'http://localhost:4000/api/estimate?'
 
-    constructor(private http:Http) { 
-        // this.headers = new Headers({
-        //     'Authorization': 'Token '+ environment.uber.serverToken,
-        //     'Accept-Language': 'en_GB',
-        //     'Content-Type': 'application/json',
-        //     'Access-Control-Allow-Origin': '*'
-        // })
-    }
+    constructor(private http:Http) {}
 
     estimate(coordinates:EstimateParams):Observable<Price[]> {
         
         let params:string = `start_latitude=${coordinates.start_latitude}&start_longitude=${coordinates.start_longitude}&end_latitude=${coordinates.end_latitude}&end_longitude=${coordinates.end_longitude}`
         let options = new RequestOptions({headers: this.headers})
         
-        return this.http.get(`${this.url}${encodeURIComponent(params)}`)
-            .map(res => {
-                console.log(res)
-                return res.json().prices as [Price]
-            })
+        return this.http.get(this.url + params)
+            .map(res => res.json().prices as [Price])
     }
 
     private handleError(error:Error): void {

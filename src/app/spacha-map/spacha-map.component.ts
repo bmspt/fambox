@@ -122,11 +122,11 @@ export class SpachaMapComponent implements OnInit {
                 source: 'firebase',
                 type: 'symbol',
                 layout: {
-                    'text-field': '{message}',
-                    'text-size': 12,
-                    'text-transform': 'uppercase',
-                    'icon-image': 'car-15',
-                    'text-offset': [0, 1.5]
+                    // 'text-field': '{message}',
+                    // 'text-size': 12,
+                    // 'text-transform': 'uppercase',
+                    'icon-image': 'car-15'
+                    // 'text-offset': [0, 1.5]
                 },
                 paint: {
                     'text-color': '#f404b8',
@@ -189,9 +189,11 @@ export class SpachaMapComponent implements OnInit {
         // this.source.setData(data)
     }
 
-    unsetAddress(address:Address):void {
-        address = null
+    resetFields():void {
+        this.pickupAddress = this.destinationAddress = null
+        this.pickupLocation = this.destinationLocation = ''
         this.prices = Observable.of<Price[]>([])
+        this.searchTerms.next()
     }
 
     buttonState() {
@@ -208,6 +210,7 @@ export class SpachaMapComponent implements OnInit {
     }
 
     private getPrices():void {
+        
         let coordinates:EstimateParams = {
             start_latitude:  this.pickupAddress.geocodes.latitude,
             start_longitude: this.pickupAddress.geocodes.longitude,
