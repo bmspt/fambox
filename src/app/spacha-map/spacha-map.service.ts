@@ -76,10 +76,11 @@ export class SpachaMapService {
         })
     }
 
-    reverse(address:LngLat):Observable<Address> {
+    reverse(address:[number]):Observable<Address> {
         // return this.http.get('api/addresses/reverse')
+        
         return this.http
-            .get(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${address.latitude},${address.longitude}`)
+            .get(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${address[1]},${address[0]}`)
             .map(res => res.json().results)
             .map(results => {
                 let address = new Address()
@@ -90,7 +91,6 @@ export class SpachaMapService {
                     latitude: found.geometry.location.lat, 
                     longitude: found.geometry.location.lng 
                 } 
-                
                 return address
             })
     }

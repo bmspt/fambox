@@ -6,6 +6,7 @@ import { SpachaMapService } from "./spacha-map.service";
 import { GeoJson, FeatureCollection, Address } from "../map";
 
 import { Subject } from "rxjs/Subject";
+// import { ReplaySubject } from "rxjs/ReplaySubject";
 import { Observable } from "rxjs/Observable";
 
 // Observable class extension
@@ -120,14 +121,15 @@ export class SpachaMapComponent implements OnInit {
                 type: 'symbol',
                 layout: {
                     'text-field': '{message}',
-                    'text-size': 24,
+                    'text-size': 12,
                     'text-transform': 'uppercase',
-                    'icon-image': 'rocket-15',
+                    'icon-image': 'car-15',
                     'text-offset': [0, 1.5]
                 },
                 paint: {
-                    'text-color': '#f16624',
-                    'text-halo-color': '#fff',
+                    'text-color': '#f404b8',
+                    // 'text-halo-color': '#fff',
+                    // 'icon-halo-color': '#f404b8',
                     'text-halo-width': 2
                 }
             })
@@ -143,6 +145,7 @@ export class SpachaMapComponent implements OnInit {
 
             geolocateControl.on('geolocate', (event) => {
                 this.flyTo(new GeoJson([event.coords.longitude, event.coords.latitude], { message: 'You' }))
+                this.populateUserLocation([event.coords.longitude, event.coords.latitude])
             })
         }) // END Map.on('load', ...)
     }
@@ -168,24 +171,39 @@ export class SpachaMapComponent implements OnInit {
         if (this.pickupAddress) {
             this.destinationAddress = address
             this.destinationLocation = address.formattedAddress
-            this.searchResults = Observable.of<Address[]>([])
         } else {
             this.pickupAddress = address
             this.pickupLocation = address.formattedAddress            
         }
-
+        this.searchTerms.next()        
         // const coordinates = [address.geocodes.longitude, address.geocodes.latitude]
         // const newMarker = new GeoJson(coordinates, { message: address.formattedAddress })
         // let data = new FeatureCollection(newMarker)
         // this.source.setData(data)
     }
 
-    unsetAddress(address:Address):void {
-        address = null
+    Search(address:string, type?:string) {
+        // type == 'pickup' ? this.editingPickup = true : this.editingPickup = false
+    }
+
+    unsetAddress(address:string):void {
+        this.pickupAddress = null
+        this.pickupLocation = null            
+            // console.log(address, 'address was clicked');
+        
     }
 
     buttonState() {
         console.log('Reserve btn clicked')
+    }
+
+    private populateUserLocation(coordinates:[number]):void {
+        let coords = { longitude:coordinates[0], latitude:coordinates[1] }
+        this.mapService.reverse([coords.longitude, coords.latitude])
+        .subscribe(a => {
+            this.pickupAddress = a
+            this.pickupLocation = a.formattedAddress
+        })
     }
 }
 

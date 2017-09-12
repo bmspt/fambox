@@ -35,7 +35,7 @@
                             </span>
                         </div>
                         <div class="control">
-                            <span class="button">
+                            <span class="button" (click)="unsetAddress('pickup')" >
                                 <!-- <i class="fa fa-times"></i> -->
                                 X
                             </span>
@@ -62,6 +62,13 @@
                     </div> -->
                     <!-- </div> -->
 
+                    <div class="panel-block is-active" *ngFor="let address of searchResults | async" (click)="setAddress(address)">
+                        <span class="panel-icon">
+                            <i class="fa fa-map-marker"></i>
+                        </span>
+                        {{ address.formattedAddress }}
+                    </div>
+                    
                     <hr>
                     <table class="table is-fullwidth" *ngIf="pickupAddress && destinationAddress">
                         <tr class="is-selected">
@@ -93,13 +100,6 @@
                 </span>
                 </p>
             </div> -->
-
-            <div class="panel-block is-active" *ngFor="let address of searchResults | async" (click)="setAddress(address)">
-                <span class="panel-icon">
-                    <i class="fa fa-map-marker"></i>
-                </span>
-                {{ address.formattedAddress }}
-            </div>
 
             <div class="panel-block" *ngIf="pickupAddress && destinationAddress">
                 <button class="button is-primary is-large  is-fullwidth " 
