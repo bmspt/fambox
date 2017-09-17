@@ -73,7 +73,7 @@
 
             <div class="panel-block" *ngIf="pickupAddress && destinationAddress">
                 <button class="button is-primary is-large  is-fullwidth " 
-                    (click)="buttonState()" >
+                    (click)="showModal()" >
                     <span>REQUEST RIDE</span>
                     <span class="icon">
                         <i class="fa fa-chevron-right"></i>
@@ -85,21 +85,42 @@
 
     <!-- Spacha-Map -->
     <div class="map column" id="spacha-map"></div>  
+
+    <div class="modal" id="appStoreModal" >
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Download Spøta to book a ride</p>
+                <button class="delete" aria-label="close" (click)="showModal()"></button>
+            </header>
+            <section class="modal-card-body">
+                <!-- Modal Content ... -->
+                <table class="table is-fullwidth">
+                    <tbody>
+                        <tr>
+                            <td><a href='#'><img alt='Get it on Google Play' src='/assets/images/en_badge_web_generic.png'/></a></td>
+                            <td><a href='#'><img alt='Get it on the AppStore' src='/assets/images/apple-appstore-badge.png'/></a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </div>
 </div>
 
 <footer class="footer">
-        <div class="container">
-          <div class="content has-text-centered">
+    <div class="container">
+        <div class="content has-text-centered">
             <p>
-              <strong>FAMBOX</strong> by <a href="https://github.io/thecrab">The Crab</a>. Made with lots of love
-              <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. The website content
-              is copyright <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC ANS 4.0</a>.
+                <strong>FAMBOX</strong> by <a href="https://github.io/thecrab">The Crab</a>. Made with lots of love
+                <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. The website content
+                is copyright <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC ANS 4.0</a>.
             </p>
             <p>
-              <a class="icon" href="https://github.com/thecrab/fambox">
-                <i class="fa fa-github"></i>
-              </a>
+                <a class="icon" href="https://github.com/thecrab/fambox">
+                    <i class="fa fa-github"></i>
+                </a>
             </p>
-          </div>
         </div>
-      </footer>
+    </div>
+</footer>

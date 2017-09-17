@@ -196,8 +196,8 @@ export class SpachaMapComponent implements OnInit {
         this.searchTerms.next()
     }
 
-    buttonState() {
-        console.log('Reserve btn clicked')
+    showModal():void {
+        document.getElementById('appStoreModal').classList.toggle('is-active')
     }
 
     private populateUserLocation(coordinates:[number]):void {
