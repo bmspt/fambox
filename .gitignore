@@ -7,7 +7,7 @@
 
 # dependencies
 /node_modules
-/src/environments/*environment
+/src/environments/environment.**
 
 # IDEs and editors
 /.idea
