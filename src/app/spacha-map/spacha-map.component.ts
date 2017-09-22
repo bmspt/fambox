@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core'
 import { Http } from "@angular/http"
 import * as mapboxgl from "mapbox-gl"
-import { Map, GeolocateControl, LngLat } from "mapbox-gl"
+import { Map, GeolocateControl, LngLat, LngLatBounds } from "mapbox-gl"
 import { SpachaMapService } from "./spacha-map.service";
 import { GeoJson, FeatureCollection, Address } from "../map";
 import { EstimateService, Price, EstimateParams } from "../services/estimate.service";
@@ -34,8 +34,10 @@ export class SpachaMapComponent implements OnInit {
     message:string = "Hello msg"
 
     // data
-    source: any
+    vehiclesLocations: any
+    directions: any
     markers: any
+    private estimateParams:EstimateParams = null
 
     // Search
     private searchTerms:Subject<string> = new Subject<string>()
@@ -83,6 +85,7 @@ export class SpachaMapComponent implements OnInit {
             zoom: 13,
             center: [this.lng, this.lat],
             style: 'mapbox://styles/mapbox/dark-v9'
+            // style: 'mapbox://styles/mapbox/navigation-preview-night-v2'
         })
 
         this.buildMap()    
@@ -103,12 +106,20 @@ export class SpachaMapComponent implements OnInit {
             this.mapService.createMarkers(newMarker)
         }) 
 
-        // Add realtime firebase data on map load
+        // Add realtime vehicles from firebase data on map load
         this.map.on('load', (e) => {
             this.map.addControl(geolocateControl)
             
             // register the source
-            this.map.addSource('firebase', {
+            this.map.addSource('vehicles', {
+                type: 'geojson',
+                data: {
+                    type: 'FeatureCollection',
+                    features: []
+                }
+            })
+
+            this.map.addSource('directions', {
                 type: 'geojson',
                 data: {
                     type: 'FeatureCollection',
@@ -118,14 +129,15 @@ export class SpachaMapComponent implements OnInit {
             
             // create map layers with realtime data
             this.map.addLayer({
-                id: 'firebase',
-                source: 'firebase',
+                id: 'vehicles',
+                source: 'vehicles',
                 type: 'symbol',
                 layout: {
                     // 'text-field': '{message}',
                     // 'text-size': 12,
                     // 'text-transform': 'uppercase',
                     'icon-image': 'car-15'
+                    // 'icon-image': '{icon}-15'
                     // 'text-offset': [0, 1.5]
                 },
                 paint: {
@@ -137,17 +149,34 @@ export class SpachaMapComponent implements OnInit {
             })
 
             // get source
-            this.source = this.map.getSource('firebase')
+            this.vehiclesLocations = this.map.getSource('vehicles')
             
             // subscribe to realtime database set and source
             this.markers.subscribe(markers => {
                 let data = new FeatureCollection(markers)
-                this.source.setData(data)
+                this.vehiclesLocations.setData(data)
             })
+
+            this.map.addLayer({
+                id: 'directions',
+                source: 'directions',
+                type: 'line',
+                layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                paint: {
+                    'line-color': '#f404b8',
+                    'line-width': 4
+                }
+            })
+
+            // get source
+            this.directions = this.map.getSource('directions')
 
             geolocateControl.on('geolocate', (event) => {
                 this.flyTo(new GeoJson([event.coords.longitude, event.coords.latitude], { message: 'You' }))
-                this.populateUserLocation([event.coords.longitude, event.coords.latitude])
+                this.populatePickupLocation([event.coords.longitude, event.coords.latitude])
             })
         }) // END Map.on('load', ...)
     }
@@ -182,11 +211,12 @@ export class SpachaMapComponent implements OnInit {
 
         if (this.pickupAddress && this.destinationAddress) {
             this.getPrices()
+            this.getDirections()        
         }
         // const coordinates = [address.geocodes.longitude, address.geocodes.latitude]
         // const newMarker = new GeoJson(coordinates, { message: address.formattedAddress })
         // let data = new FeatureCollection(newMarker)
-        // this.source.setData(data)
+        // this.vehiclesLocations.setData(data)
     }
 
     resetFields():void {
@@ -200,7 +230,7 @@ export class SpachaMapComponent implements OnInit {
         document.getElementById('appStoreModal').classList.toggle('is-active')
     }
 
-    private populateUserLocation(coordinates:[number]):void {
+    private populatePickupLocation(coordinates:[number]):void {
         let coords = { longitude:coordinates[0], latitude:coordinates[1] }
         this.mapService.reverse([coords.longitude, coords.latitude])
         .subscribe(a => {
@@ -211,14 +241,33 @@ export class SpachaMapComponent implements OnInit {
 
     private getPrices():void {
         
-        let coordinates:EstimateParams = {
+        this.estimateParams = {
             start_latitude:  this.pickupAddress.geocodes.latitude,
             start_longitude: this.pickupAddress.geocodes.longitude,
             end_latitude:    this.destinationAddress.geocodes.latitude,
             end_longitude:   this.destinationAddress.geocodes.longitude
         }
 
-        this.prices = this.estimateService.estimate(coordinates)
+        this.prices = this.estimateService.estimate(this.estimateParams)
+    }
+
+    private getDirections():void {
+        let coordinates:string = `${this.estimateParams.start_longitude},${this.estimateParams.start_latitude};${this.estimateParams.end_longitude},${this.estimateParams.end_latitude}`
+        this.mapService.getDirections(coordinates).subscribe( directions => {
+            this.showRoute(directions)
+        })
+    }
+
+    private showRoute(directions:any[]):void {
+        let data = new FeatureCollection(directions)
+        this.directions.setData(data)
+
+        let coordinates = directions[0].geometry.coordinates
+        let bounds = coordinates.reduce((bound, coord) => {
+            return bound.extend(coord)
+        }, new LngLatBounds(coordinates[0], coordinates[1]))
+
+        this.map.fitBounds(bounds, { padding: 60 })
     }
 }
 

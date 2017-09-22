@@ -46,8 +46,9 @@ export class SpachaMapService {
 
     getDirections(geocodes:string):Observable<any> {
         // Semicolon-separated list of {longitude},{latitude};{longitude},{latitude} coordinate pairs
-        let directionsUrl:string = `https://api.mapbox.com/directions/v5/mapbox/driving/`
-        return this.http.get(`${ directionsUrl }${geocodes}`)
+        let directionsUrl:string = `https://api.mapbox.com/directions/v5/mapbox/driving-traffic/`
+        let options              = `geometries=geojson&overview=full&access_token=${mapboxgl.accessToken}`
+        return this.http.get(`${ directionsUrl }${geocodes}?${options}`)
                         .map(directions => directions.json().routes)
     }
 
@@ -77,6 +78,7 @@ export class SpachaMapService {
     }
 
     reverse(address:[number]):Observable<Address> {
+        // address:LngLat ====> address.toArray()
         // return this.http.get('api/addresses/reverse')
         
         return this.http

@@ -1,2 +1,19 @@
 /* You can add global styles to this file, and also import other style files */
 @import '../node_modules/mapbox-gl/dist/mapbox-gl.css';
+
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+/* body {
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-rows: 100%;
+    background-color: #F04E4E;
+} */
+
+.is-600px-height {
+    min-height: 650px;
+}
